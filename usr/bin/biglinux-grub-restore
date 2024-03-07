@@ -1,15 +1,21 @@
 #!/bin/bash
 ##################################
+#
 #  Author1: Bruno Goncalves (www.biglinux.com.br) 
 #  Author2: Rafael Ruscher (rruscher@gmail.com)  
-#  Date:    2022/08/19
+#  Author3: Fernando Souza (https://www.youtube.com/@fernandosuporte)
+#
+#  Date:    2024/03/07
 #  
 #  Description: Restore GRUB and installed system
 #  
 # Licensed by GPL V2 or greater
+#
 ##################################
 
-#Translation
+which zenity || exit
+
+# Translation
 export TEXTDOMAINDIR="/usr/share/locale"
 export TEXTDOMAIN=biglinux-grub-restore
 
@@ -17,7 +23,8 @@ export TEXTDOMAIN=biglinux-grub-restore
 # only in live mode
 if [ ! -e /livefs-pkgs.txt ] ;
 then
-    zenity --warning --text $"Este utilitário deve ser utilizado somente no modo live!"  --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg 
+    zenity --warning --text $"Este utilitário deve ser utilizado somente no modo live!"  --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg  2>/dev/null
+
     exit
 fi
 
@@ -33,7 +40,7 @@ instalado no HD ou SSD.</span>
 melhor não prosseguir o uso desta ferramenta.</span>
 <span font='10' foreground='gray'>Provavelmente funcione também com outras distribuições Linux.</span>
 
-Deseja prosseguir?" --width=300 --height=100 --title=$"Restaurar o Boot, Grub e initrd" --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --icon-name='system-run' --no-wrap
+Deseja prosseguir?" --width=300 --height=100 --title=$"Restaurar o Boot, Grub e initrd" --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --icon-name='system-run' --no-wrap 2>/dev/null
 
 if [ "$?" = "1" ];
 then
@@ -41,14 +48,16 @@ then
 fi
 
 # Load info from system
-pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY KDE_SESSION_VERSION=5 KDE_FULL_SESSION=true /usr/share/biglinux/grub-restore/grub-restore | zenity --progress --pulsate --no-cancel --auto-close --text $"Aguarde..."
+pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY KDE_SESSION_VERSION=5 KDE_FULL_SESSION=true /usr/share/biglinux/grub-restore/grub-restore | zenity --progress --pulsate --no-cancel --auto-close --text $"Aguarde..."  2>/dev/null
 
 # No Linux detected
 if [ "$(wc -l < /tmp/os-prober)" = "0" ];
 then
 zenity --error --title=$"Restaurar o Boot, Grub e initrd" --text $"Não encontrei nenhum Linux instalado neste computador, processo cancelado.
-"  --width=200 --height=25 --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg
+"  --width=200 --height=25 --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg 2>/dev/null
+
 exit
+
 fi
 
 # boot LEGACY without partition LEGACY
@@ -68,7 +77,8 @@ provavelmente a restauração do Grub não irá funcionar.
 
 Tente reiniciar e através da Bios do computador efetuar o boot em modo Legacy ou BIOS.
 
-Deseja tentar mesmo com pouca provabilidade de funcionar?" --width=300 --height=100 --title=$"Restaurar o Boot, Grub e initrd" --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --icon-name='drive-harddisk' --no-wrap
+Deseja tentar mesmo com pouca provabilidade de funcionar?" --width=300 --height=100 --title=$"Restaurar o Boot, Grub e initrd" --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --icon-name='drive-harddisk' --no-wrap 2>/dev/null 
+
     if [ "$?" = "1" ];
     then
         exit
@@ -88,7 +98,7 @@ provavelmente a restauração do Grub não irá funcionar.
 
 Tente reiniciar e através da Bios do computador efetuar o boot em modo EFI.
 
-Deseja tentar mesmo com pouca provabilidade de funcionar?" --width=300 --height=100 --title=$"Restaurar o Boot, Grub e initrd" --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --icon-name='drive-harddisk' --no-wrap
+Deseja tentar mesmo com pouca provabilidade de funcionar?" --width=300 --height=100 --title=$"Restaurar o Boot, Grub e initrd" --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --icon-name='drive-harddisk' --no-wrap 2>/dev/null
     if [ "$?" = "1" ];
     then
         exit
@@ -111,11 +121,11 @@ PARTITION=EFI
 
 zenity --list --title=$"Restaurar o Boot, Grub e initrd" --width=790 --height=337 --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --text $"<span font='16' foreground='LightSkyBlue'>Selecione uma opção:</span>
 
-Encontrei mais de uma partição EFI, selecione qual devo utilizar:" --hide-header --column="" < /tmp/efi-partitions > /tmp/efi-selected
+Encontrei mais de uma partição EFI, selecione qual devo utilizar:" --hide-header --column="" < /tmp/efi-partitions > /tmp/efi-selected  2>/dev/null
 
         if [ "$(cat /tmp/efi-selected)" = "" ];
         then
-            zenity --error --text=$"Nenhuma partição EFI selecionada, processo cancelado." --width=300 --height=100 --title=$"Restaurar o Boot, Grub e initrd"
+            zenity --error --text=$"Nenhuma partição EFI selecionada, processo cancelado." --width=300 --height=100 --title=$"Restaurar o Boot, Grub e initrd" 2>/dev/null
             exit
         fi
     fi
@@ -129,14 +139,16 @@ if [ "$(wc -l < /tmp/os-prober)" -gt "1" ];
 then
 zenity --list --title=$"Restaurar o Boot, Grub e initrd" --width=790 --height=337 --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg  --text $"<span font='16' foreground='LightSkyBlue'>Selecione uma opção:</span>
 
-Encontrei mais de um Linux instalado neste computador, selecione qual devo restaurar o boot:" --hide-header --column="" < /tmp/os-prober > /tmp/os-prober-selected
+Encontrei mais de um Linux instalado neste computador, selecione qual devo restaurar o boot:" --hide-header --column="" < /tmp/os-prober > /tmp/os-prober-selected   2>/dev/null
         if [ "$(cat /tmp/os-prober-selected)" = "" ];
         then
-            zenity --error --text=$"Nenhuma partição selecionada, processo cancelado." --width=300 --height=100 --title=$"Restaurar o Boot, Grub e initrd"
+
+            zenity --error --text=$"Nenhuma partição selecionada, processo cancelado." --width=300 --height=100 --title=$"Restaurar o Boot, Grub e initrd"  2>/dev/null
+
             exit
         fi
 else
-cp -f /tmp/os-prober /tmp/os-prober-selected
+        cp -f /tmp/os-prober /tmp/os-prober-selected
 fi
 
 
@@ -146,9 +158,9 @@ then
     if [ "$(wc -l < /tmp/grub-disks)" -gt "1" ];
     then
     
-    zenity --list --title=$"Restaurar o Boot, Grub e initrd" --width=790 --height=337 --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --text $"<span font='16' foreground='LightSkyBlue'>Selecione uma opção:</span>
+    zenity --list --title=$"Restaurar o Boot, Grub e initrd" --width=790 --height=337 --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --text $"<span font='16' foreground='LightSkyBlue'>Selecione uma opção:</span> 
     
-Encontrei mais de um dispositivo de armazenamento, selecione em qual devo gravar o boot:" --column=$"Disco" --column=$"Tamanho" --column=$"Nome" --column=$"Tabela de partições" $(cat /tmp/grub-disks) > /tmp/grub-disks-selected
+Encontrei mais de um dispositivo de armazenamento, selecione em qual devo gravar o boot:" --column=$"Disco" --column=$"Tamanho" --column=$"Nome" --column=$"Tabela de partições" $(cat /tmp/grub-disks) > /tmp/grub-disks-selected  2>/dev/null
     else
         cut -f1 /tmp/grub-disks -d" " > /tmp/grub-disks-selected
     fi
@@ -177,7 +189,7 @@ Encontrei mais de um dispositivo de armazenamento, selecione em qual devo gravar
 <span font='11' foreground='gray'>Formato da partição:</span> $PARTITION_FORMAT
 <span font='11' foreground='gray'>UUID da partição:</span> $UUID_PARTITION
 
-Deseja prosseguir?" --width=300 --height=100 --title=$"Restaurar o Boot, Grub e initrd"  --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --icon-name='drive-harddisk' --no-wrap
+Deseja prosseguir?" --width=300 --height=100 --title=$"Restaurar o Boot, Grub e initrd"  --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --icon-name='drive-harddisk' --no-wrap  2>/dev/null
 
     if [ "$?" = "1" ];
     then
@@ -185,10 +197,12 @@ Deseja prosseguir?" --width=300 --height=100 --title=$"Restaurar o Boot, Grub e 
     else
         net=$(ping -c 1 8.8.8.8 | cut -d " " -f 1 | grep 64)
         if [ "$net" != "64" ]; then
-            zenity --info --text $"Seu computador não está conectado a internet, as opções 2 e 3 precisam de internet para funcionarem." --width=300 --height=25 --icon-name='network-offline' --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg
+            zenity --info --text $"Seu computador não está conectado a internet, as opções 2 e 3 precisam de internet para funcionarem." --width=300 --height=25 --icon-name='network-offline' --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg  2>/dev/null 
         fi
+
         rm -f /tmp/grub-restore-apply-mode
-        zenity --list --title=$"Restaurar o Boot, Grub e initrd" --width=790 --height=337 --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --text $"<span font='16' foreground='LightSkyBlue'>Selecione a opção desejada:</span>
+
+        zenity --list --title=$"Restaurar o Boot, Grub e initrd" --width=790 --height=337 --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --text $"<span font='16' foreground='LightSkyBlue'>Selecione a opção desejada:</span> 
         
 A restauração pode ser feita de 3 formas (<span foreground='gray'>Simples, Intermediária ou Completa</span>), em caso de dúvidas, tente a primeira 
 opção, reinicie o computador e veja se resolveu.
@@ -201,15 +215,17 @@ Se o problema persistir tente as outras opções." \
 3 $"Completa, executa as etapas da restauração intermediária, atualiza o sistema e verifica se o kernel LTS está instalado." \
 4 $"Interativa, abre um terminal dentro do sistema selecionado." \
 5 $"Interativa, abre a central de controle dentro do sistema selecionado." \
-6 $"Interativa, abre o gerenciador de pacotes pamac-manager dentro do sistema selecionado." > /tmp/grub-restore-apply-mode
+6 $"Interativa, abre o gerenciador de pacotes pamac-manager dentro do sistema selecionado." > /tmp/grub-restore-apply-mode  2>/dev/null
         if [ "$?" = "1" ];
         then
             exit
     
         else
-            #restore
+            # restore
+
             pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY KDE_SESSION_VERSION=5 KDE_FULL_SESSION=true konsole -e /usr/share/biglinux/grub-restore/grub-apply-legacy
-            zenity --info --text $"Concluído!" --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg 
+            zenity --info --text $"Concluído!" --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg  2>/dev/null
+
         fi
     fi
 fi
@@ -225,7 +241,7 @@ then
     UUID_PARTITION="$(awk -F: '{ print $6 }' /tmp/os-prober-selected | sed 's|UUID=||g')"
 
     # Confirm
-    zenity --question --text=$"<span font='16' foreground='LightSkyBlue'>Confirme os dados:</span>
+    zenity --question --text=$"<span font='16' foreground='LightSkyBlue'>Confirme os dados:</span> 
     
 <span font='11' foreground='gray'>Modo de boot:</span> EFI
 <span font='11' foreground='gray'>Partição EFI:</span> $EFI_PARTITION
@@ -235,7 +251,7 @@ then
 <span font='11' foreground='gray'>Formato da partição:</span> $PARTITION_FORMAT
 <span font='11' foreground='gray'>UUID da partição:</span> $UUID_PARTITION
 
-Deseja prosseguir?" --width=300 --height=100 --title=$"Restaurar o Boot, Grub e initrd"  --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --icon-name='drive-harddisk' --no-wrap  
+Deseja prosseguir?" --width=300 --height=100 --title=$"Restaurar o Boot, Grub e initrd"  --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --icon-name='drive-harddisk' --no-wrap  2>/dev/null
 
     if [ "$?" = "1" ];
     then
@@ -243,12 +259,12 @@ Deseja prosseguir?" --width=300 --height=100 --title=$"Restaurar o Boot, Grub e 
     else
         net=$(ping -c 1 8.8.8.8 | cut -d " " -f 1 | grep 64)
         if [ "$net" != "64" ]; then
-            zenity --info --text $"Seu computador não está conectado a internet, as opções 2 e 3 precisam de internet para funcionarem." --width=300 --height=25 --icon-name='network-offline' --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg
+            zenity --info --text $"Seu computador não está conectado a internet, as opções 2 e 3 precisam de internet para funcionarem." --width=300 --height=25 --icon-name='network-offline' --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg  2>/dev/null
         fi
         rm -f /tmp/grub-restore-apply-mode
 
         
-        zenity --list --title=$"Restaurar o Boot, Grub e initrd" --width=790 --height=337 --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --text $"<span font='16' foreground='LightSkyBlue'>Selecione a opção desejada:</span>
+        zenity --list --title=$"Restaurar o Boot, Grub e initrd" --width=790 --height=337 --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg --text $"<span font='16' foreground='LightSkyBlue'>Selecione a opção desejada:</span> 
         
 A restauração pode ser feita de 3 formas (<span foreground='gray'>Simples, Intermediária ou Completa</span>), em caso de dúvidas, tente a primeira 
 opção, reinicie o computador e veja se resolveu.
@@ -261,7 +277,7 @@ Se o problema persistir tente as outras opções." \
 3 $"Completa, executa as etapas da restauração intermediária, atualiza o sistema e verifica se o kernel LTS está instalado." \
 4 $"Interativa, abre um terminal dentro do sistema selecionado." \
 5 $"Interativa, abre a central de controle dentro do sistema selecionado." \
-6 $"Interativa, abre o gerenciador de pacotes pamac-manager dentro do sistema selecionado." > /tmp/grub-restore-apply-mode
+6 $"Interativa, abre o gerenciador de pacotes pamac-manager dentro do sistema selecionado." > /tmp/grub-restore-apply-mode  2>/dev/null
         if [ "$?" = "1" ];
         then
             exit
@@ -269,7 +285,9 @@ Se o problema persistir tente as outras opções." \
         else
             #restore
             pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY KDE_SESSION_VERSION=5 KDE_FULL_SESSION=true konsole -e /usr/share/biglinux/grub-restore/grub-apply-efi
-            zenity --info --text $"Concluído!" --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg 
+            zenity --info --text $"Concluído!" --window-icon=/usr/share/biglinux/grub-restore/grub-icon.svg  2>/dev/null
         fi
     fi
 fi
+
+exit 0
